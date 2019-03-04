@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/nav_header_height"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark"
+            android:orientation="vertical"
+            android:gravity="bottom">
+
+
+    <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="229dp"
+            app:srcCompat="@drawable/home"
+            android:id="@+id/home"/>
+
+    <TextView
+            android:text="Home Control"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/appName"/>
+    <TextView
+            android:text="TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:id="@+id/textView2"/>
+
+
+</LinearLayout>

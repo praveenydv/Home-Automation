@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "878890077632",
+    "firebase_url": "https://homecontrol-27e93.firebaseio.com",
+    "project_id": "homecontrol-27e93",
+    "storage_bucket": "homecontrol-27e93.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878890077632:android:8fb91d2dbd48f490",
+        "android_client_info": {
+          "package_name": "com.example.praveen.homecontrol"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "878890077632-tq0r3usapcficb68oro2je56klb8em7h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.praveen.homecontrol",
+            "certificate_hash": "a474286c1ff03348e26590f775c0e087e35d7cbc"
+          }
+        },
+        {
+          "client_id": "878890077632-netsvbr9m4s3gcvh2lt6um1raj1og4up.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-ZXtpLazxZMALFlTEx1qCxrmwj1QNUww"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "878890077632-netsvbr9m4s3gcvh2lt6um1raj1og4up.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
