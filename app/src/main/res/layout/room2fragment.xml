@@ -2,72 +2,64 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
->
+                android:id="@+id/room2frg">
 
 
     <TextView
-            android:text="Light"
+            android:text="Add"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:id="@+id/light_room2"
+            android:layout_height="55dp"
+            android:id="@+id/addview2"
             android:textSize="30dp"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/textView"
-            android:background="#f2f4f7"
+            android:background="@drawable/textview_design"
             android:paddingLeft="25dp"
 
-            android:layout_marginBottom="3dp"
-            android:gravity="center_vertical"/>
+            android:gravity="center"
+            android:clickable="true"
+            android:layout_below="@+id/linearlayout2"/>
 
-    <TextView
-            android:text="Fan"
+    <LinearLayout
             android:layout_width="match_parent"
-            android:textSize="30dp"
-            android:gravity="center_vertical"
-            android:layout_height="100dp"
-            android:id="@+id/fan_room2"
-            android:background="#f2f4f7"
-            android:paddingLeft="25dp"
+            android:layout_height="45dp"
+            android:id="@+id/linearlayout2"
+            android:weightSum="2">
 
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/light_room2"
-            android:layout_marginTop="-3dp"/>
-    <TextView
-            android:text="ON"
-            android:layout_width="80dp"
-            android:layout_height="50dp"
-            android:textSize="30dp"
-            android:textColor="#00ff00"
-            android:id="@+id/r2light_on"
-            android:visibility="invisible"
-            android:layout_alignStart="@+id/r2fan_on"
-            android:layout_alignBaseline="@+id/light_room2"/>
-    <TextView
-            android:text="OFF"
-            android:layout_width="80dp"
-            android:layout_height="50dp"
-            android:textSize="30dp"
-            android:textColor="#ff0000"
-            android:id="@+id/r2light_off"
-            android:layout_alignStart="@+id/r2light_on" android:layout_alignBaseline="@+id/light_room2"/>
-    <TextView
-            android:text="ON"
-            android:layout_width="80dp"
-            android:layout_height="50dp"
-            android:textSize="30dp"
-            android:textColor="#00ff00"
-            android:id="@+id/r2fan_on"
-            android:visibility="invisible"
-            android:layout_alignTop="@+id/r2fan_off" android:layout_alignStart="@+id/r2fan_off"/>
-    <TextView
-            android:text="OFF"
-            android:layout_width="80dp"
-            android:layout_height="50dp"
-            android:textSize="30dp"
-            android:textColor="#ff0000"
-            android:id="@+id/r2fan_off"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="42dp"
-            android:layout_alignParentTop="true" android:layout_marginTop="140dp"/>
+
+        <TextView
+                android:text="Temp:- 0°C"
+                android:layout_width="0dp"
+                android:layout_height="45dp"
+                android:layout_weight="1"
+                android:id="@+id/temp2"
+                android:textSize="22dp"
+                android:background="@drawable/tempdoor_design"
+                android:gravity="center"
+                android:clickable="true"
+                android:paddingRight="2dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"/>
+
+
+        <TextView
+                android:text="Door Open"
+                android:layout_width="0dp"
+                android:layout_height="45dp"
+                android:paddingLeft="2dp"
+                android:layout_weight="1"
+                android:id="@+id/door2"
+                android:textSize="22dp"
+                android:background="@drawable/tempdoor_design"
+                android:gravity="center"
+                android:clickable="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"/>
+
+    </LinearLayout>
+
+
+
+
+
 
 </RelativeLayout>

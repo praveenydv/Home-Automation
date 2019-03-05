@@ -19,6 +19,7 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.google.firebase.database.*;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.DataInputStream;
@@ -64,12 +65,13 @@ public class room1fragment extends Fragment {
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)  {
         ((MainActivity) getActivity()).setActionBarTitle("Room1");
-        Ids = new int[7];
-        data = new int[7];
+        Ids = new int[8];
+        data = new int[8];
         ids = new HashSet<String>();
         obj = new JSONObject();
+
 
         for (int f = 0; f < 7; f++) {
             data[f] = 3;
@@ -80,6 +82,7 @@ public class room1fragment extends Fragment {
             }
 
         }
+//        ids.add(String.valueOf(linearlayout.getId())+10);
 
         view = inflater.inflate(R.layout.room1fragment, container, false);
         relativeLayout = ((RelativeLayout) view.findViewById(R.id.room1frg));
@@ -89,6 +92,8 @@ public class room1fragment extends Fragment {
         preferences2 = getContext().getSharedPreferences("data_info", MODE_PRIVATE);
          database = FirebaseDatabase.getInstance();
 
+
+
        density = getContext().getResources().getDisplayMetrics().density;
         add = view.findViewById(R.id.addview);
         temp = view.findViewById(R.id.temp);
@@ -97,17 +102,25 @@ public class room1fragment extends Fragment {
         i = linearlayout.getId();
         textView = new TextView[17];
         if (ids.size() > 0) {
-            showTextview(k);
+            try {
+                showTextview(k);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         add.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View v) {
-                if (ids.size() < 7) {
-                    addTextview();
+                if (ids.size() < 6) {
+                    try {
+                        addTextview();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 } else {
-                    Toast.makeText(getContext(), "You can add max 7 lights only",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "You can add max 6 lights only",Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -124,19 +137,10 @@ public class room1fragment extends Fragment {
     @TargetApi(Build.VERSION_CODES.N)
     @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    private void showTextview(int t) {
+    private void showTextview(int t) throws JSONException {
 
-        String strg = String.valueOf(ids);
-        strg = strg.replace(" ", "");
-        strg = strg.replace("[", "");
-        strg = strg.replace("]", "");
+        int[] id_array = makearray();
 
-//        Log.d("new", String.valueOf(ids));
-
-        String[] str = new String[7];
-        str = strg.split(",");
-        int[] id_array = Arrays.stream(str).mapToInt(Integer::parseInt).toArray();
-        Arrays.sort(id_array);
 
         for (int p = 0; p < id_array.length; p++) {
 //            Log.d("array2", String.valueOf(id_array[p]));
@@ -175,8 +179,10 @@ public class room1fragment extends Fragment {
                     if (data[s - 1] == 0) {
                         data[s - 1] = 1;
                     } else {
+
                         data[s - 1] = 0;
                     }
+
 
                     try {
                         obj.put(String.valueOf(s), data[s - 1]);
@@ -202,10 +208,14 @@ public class room1fragment extends Fragment {
                     if (ids.size() > 0) {
                         i = linearlayout.getId();
 
-                        showTextview(k);
+                        try {
+                            showTextview(k);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
 
-                    data[s] =3;
+                    data[s-1] =3;
                     ids = preferences.getStringSet("lights_ids", ids);
                     editor.commit();
 
@@ -239,7 +249,7 @@ public class room1fragment extends Fragment {
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @SuppressLint({"ResourceType", "NewApi"})
-    public void addTextview() {
+    public void addTextview() throws JSONException {
 
         RelativeLayout relativeLayout = view.findViewById(R.id.room1frg);
         k = 1;
@@ -312,7 +322,11 @@ public class room1fragment extends Fragment {
                 if (ids.size() > 0) {
                     i = linearlayout.getId();
 
-                    showTextview(k);
+                    try {
+                        showTextview(k);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
                 return true;
             }
@@ -343,16 +357,9 @@ public class room1fragment extends Fragment {
 
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private int findValue() {
-        ids = preferences.getStringSet("lights_ids", ids);
-        String strg = String.valueOf(ids);
-        strg = strg.replace(" ", "");
-        strg = strg.replace("[", "");
-        strg = strg.replace("]", "");
+    private int findValue() throws JSONException {
 
-        String[] str = new String[7];
-        str = strg.split(",");
-        int[] id_array = Arrays.stream(str).mapToInt(Integer::parseInt).toArray();
+      int[] id_array = makearray();
         Arrays.sort(id_array);
         int i = 0;
         for (i = 0; i < id_array.length; i++) {
@@ -382,7 +389,11 @@ public class room1fragment extends Fragment {
             for(int i=1;i<8;i++) {
                 DatabaseReference myRef = database.getReference(room + "/L" + i);
                 myRef.setValue(data[i-1]);
+
+
             }
+
+
 //                socket1.close();
         }
     }
@@ -408,7 +419,8 @@ public class room1fragment extends Fragment {
 //                    JSONObject obj = new JSONObject(mssg);
 
                     int[] ids = new int[7];
-                    ids = makearray();
+
+                      ids = makearray();
 
 
 
@@ -426,7 +438,7 @@ public class room1fragment extends Fragment {
 
                             }});
 
-                         Log.d("val1", String.valueOf(data[0]));
+//                         Log.d("val1", String.valueOf(data[0]));
 
                         boolean found1 = Arrays.stream(ids).anyMatch(x -> x == 1 + j);
 
@@ -453,7 +465,7 @@ public class room1fragment extends Fragment {
 
                         }});
 
-                    Log.d("val2", String.valueOf(data[1]));
+//                    Log.d("val2", String.valueOf(data[1]));
 
                     boolean found2 = Arrays.stream(ids).anyMatch(x -> x == 2 + j);
 
@@ -478,7 +490,7 @@ public class room1fragment extends Fragment {
 
                         }});
 
-                    Log.d("val3", String.valueOf(data[2]));
+//                    Log.d("val3", String.valueOf(data[2]));
 
                     boolean found3 = Arrays.stream(ids).anyMatch(x -> x == 3 + j);
 
@@ -504,7 +516,7 @@ public class room1fragment extends Fragment {
 
                         }});
 
-                    Log.d("val4", String.valueOf(data[3]));
+//                    Log.d("val4", String.valueOf(data[3]));
 
                     boolean found4 = Arrays.stream(ids).anyMatch(x -> x == 4 + j);
 
@@ -530,7 +542,7 @@ public class room1fragment extends Fragment {
 
                         }});
 
-                    Log.d("val5", String.valueOf(data[4]));
+//                    Log.d("val5", String.valueOf(data[4]));
 
                     boolean found5 = Arrays.stream(ids).anyMatch(x -> x == 5 + j);
 
@@ -557,7 +569,7 @@ public class room1fragment extends Fragment {
 
                         }});
 
-                    Log.d("val6", String.valueOf(data[5]));
+//                    Log.d("val6", String.valueOf(data[5]));
 
                     boolean found6 = Arrays.stream(ids).anyMatch(x -> x == 6 + j);
 
@@ -585,7 +597,7 @@ public class room1fragment extends Fragment {
 
                         }});
 
-                    Log.d("val7", String.valueOf(data[6]));
+//                    Log.d("val7", String.valueOf(data[6]));
 
                     boolean found7 = Arrays.stream(ids).anyMatch(x -> x == 7 + j);
 
@@ -656,6 +668,8 @@ public class room1fragment extends Fragment {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -697,17 +711,27 @@ public class room1fragment extends Fragment {
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private int[] makearray() {
+
+
+    private int[] makearray() throws JSONException {
         ids = preferences.getStringSet("lights_ids", ids);
-        String strg = String.valueOf(ids);
-        strg = strg.replace(" ", "");
-        strg = strg.replace("[", "");
-        strg = strg.replace("]", "");
-        String[] str = new String[7];
-        str = strg.split(",");
-        int[] id_array = Arrays.stream(str).mapToInt(Integer::parseInt).toArray();
-        Arrays.sort(id_array);
-        return id_array;
+        int[] id_array =new int[8];
+
+        if(ids.size()==0){
+            return id_array;
+        }
+        JSONArray jsonArray = new JSONArray(ids);
+        String[] str = new String[jsonArray.length()];
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            str[i] = jsonArray.getString(i);
+        }
+
+         id_array = Arrays.stream(str).mapToInt(Integer::parseInt).toArray();
+
+            Arrays.sort(id_array);
+
+            return id_array;
     }
 
 
@@ -728,18 +752,21 @@ public class room1fragment extends Fragment {
 
         protected void onProgressUpdate(Integer... values) {
 
-
+            Resources res = getResources();
 
 
             if (values[1] == 1) {
                 getActivity().runOnUiThread(new Runnable() { @Override public void run() {
-                    textView[values[0] + 1].setBackgroundColor(Color.GREEN);
+                    Drawable design = res.getDrawable(R.drawable.click_textview_design);
+                    textView[values[0] + 1].setBackground(design);
+
+
 //                Log.d(String.valueOf(values[0] + 1), String.valueOf(textView[values[0] + 1].getId()));
             }});}
-            else {
+            else if(values[1]==0) {
               getActivity().runOnUiThread(new Runnable() { @Override public void run() {
-                  textView[values[0] + 1].setBackgroundColor(Color.RED);
-
+                  Drawable design = res.getDrawable(R.drawable.click_textview_design_red);
+                  textView[values[0] + 1].setBackground(design);
               }});
 //                Log.d(String.valueOf(values[0] + 1), String.valueOf(textView[values[0] + 1].getId()));
 
