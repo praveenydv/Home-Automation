@@ -6,9 +6,8 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Bundle;
+import android.os.*;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
@@ -19,13 +18,9 @@ import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.*;
-
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
+import com.google.firebase.database.*;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -33,9 +28,11 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-
 import static android.content.Context.MODE_PRIVATE;
+import static android.support.constraint.Constraints.TAG;
+
 
 public class room1fragment extends Fragment {
     TextView[] textView;
@@ -56,7 +53,13 @@ public class room1fragment extends Fragment {
     RelativeLayout room1, relativeLayout;
     JSONObject obj;
     int[] data;
+    String room = "room01";
     LinearLayout linearlayout;
+    FirebaseDatabase database;
+
+     int temperature ;
+     int door_cond ;
+     Handler handler = null;
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Nullable
@@ -65,8 +68,8 @@ public class room1fragment extends Fragment {
         ((MainActivity) getActivity()).setActionBarTitle("Room1");
         Ids = new int[7];
         data = new int[7];
-        obj = new JSONObject();
         ids = new HashSet<String>();
+        obj = new JSONObject();
 
         for (int f = 0; f < 7; f++) {
             data[f] = 3;
@@ -75,17 +78,18 @@ public class room1fragment extends Fragment {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+
         }
+
         view = inflater.inflate(R.layout.room1fragment, container, false);
         relativeLayout = ((RelativeLayout) view.findViewById(R.id.room1frg));
         linearlayout = ((LinearLayout) view.findViewById(R.id.linearlayout));
         preferences = getContext().getSharedPreferences("Light_Info", MODE_PRIVATE);
         ids = preferences.getStringSet("lights_ids", ids);
         preferences2 = getContext().getSharedPreferences("data_info", MODE_PRIVATE);
+         database = FirebaseDatabase.getInstance();
 
-
-        density = getContext().getResources().getDisplayMetrics().density;
-
+       density = getContext().getResources().getDisplayMetrics().density;
         add = view.findViewById(R.id.addview);
         temp = view.findViewById(R.id.temp);
         door = view.findViewById(R.id.door);
@@ -103,7 +107,7 @@ public class room1fragment extends Fragment {
                 if (ids.size() < 7) {
                     addTextview();
                 } else {
-                    Toast.makeText(getContext(), "You can add max 7 lights only", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "You can add max 7 lights only",Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -200,6 +204,8 @@ public class room1fragment extends Fragment {
 
                         showTextview(k);
                     }
+
+                    data[s] =3;
                     ids = preferences.getStringSet("lights_ids", ids);
                     editor.commit();
 
@@ -301,6 +307,7 @@ public class room1fragment extends Fragment {
                 editor.putInt("No_of_light", k - 1);
                 editor.putStringSet("lights_ids", ids);
                 editor.commit();
+                data[k] =3;
 
                 if (ids.size() > 0) {
                     i = linearlayout.getId();
@@ -371,9 +378,11 @@ public class room1fragment extends Fragment {
 //                os.writeUTF(String.valueOf(obj)+"\n");
 //                os.flush();
 //                os.close();
-            FirebaseDatabase database = FirebaseDatabase.getInstance();
-            DatabaseReference myRef = database.getReference();
-            myRef.setValue("Hello, World!");
+
+            for(int i=1;i<8;i++) {
+                DatabaseReference myRef = database.getReference(room + "/L" + i);
+                myRef.setValue(data[i-1]);
+            }
 //                socket1.close();
         }
     }
@@ -385,7 +394,9 @@ public class room1fragment extends Fragment {
         public void run() {
             try {
                 do {
-                    mssg = preferences2.getString("datas", mssg);
+
+
+
 
 
 //                    socket2 = new Socket(IP, PORT2);
@@ -394,74 +405,294 @@ public class room1fragment extends Fragment {
 //                    Log.d("mssg",mssg);
 
 
-                    JSONObject obj = new JSONObject(mssg);
-                    final int temperature = Integer.parseInt(obj.getString("temp"));
-                    final int door_cond = Integer.parseInt(obj.getString("door"));
+//                    JSONObject obj = new JSONObject(mssg);
+
                     int[] ids = new int[7];
                     ids = makearray();
-                    int[] value = new int[7];
-                    for (i1 = 0; i1 < 7; i1++) {
 
-                        value[i1] = Integer.parseInt(obj.getString(String.valueOf(i1 + 1)));
-                        boolean found = Arrays.stream(ids).anyMatch(x -> x == i1 + 1 + j);
 
-                        if (found) {
+
+                         DatabaseReference ref1 = database.getReference(room + "/L1");
+
+                        ref1.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                data[0] = dataSnapshot.getValue(int.class);
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }});
+
+                         Log.d("val1", String.valueOf(data[0]));
+
+                        boolean found1 = Arrays.stream(ids).anyMatch(x -> x == 1 + j);
+
+                        if (found1) {
+
                             ChangeBackground changebackground = new ChangeBackground();
-                            changebackground.onProgressUpdate(i1,value[i1]);
+                            changebackground.onProgressUpdate(0,data[0]);
 
-                        } else {
-                            continue;
                         }
+
+
+                    DatabaseReference ref2 = database.getReference(room + "/L2");
+
+                    ref2.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            data[1] = dataSnapshot.getValue(int.class);
+
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }});
+
+                    Log.d("val2", String.valueOf(data[1]));
+
+                    boolean found2 = Arrays.stream(ids).anyMatch(x -> x == 2 + j);
+
+                    if (found2) {
+
+                        ChangeBackground changebackground = new ChangeBackground();
+                        changebackground.onProgressUpdate(1,data[1]);
+
+                    }
+
+                    DatabaseReference ref3 = database.getReference(room + "/L3");
+
+                    ref3.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            data[2] = dataSnapshot.getValue(int.class);
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }});
+
+                    Log.d("val3", String.valueOf(data[2]));
+
+                    boolean found3 = Arrays.stream(ids).anyMatch(x -> x == 3 + j);
+
+                    if (found3) {
+
+                        ChangeBackground changebackground = new ChangeBackground();
+                        changebackground.onProgressUpdate(2,data[2]);
+
+                    }
+
+                    DatabaseReference ref4 = database.getReference(room + "/L4");
+
+                    ref4.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            data[3] = dataSnapshot.getValue(int.class);
+
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }});
+
+                    Log.d("val4", String.valueOf(data[3]));
+
+                    boolean found4 = Arrays.stream(ids).anyMatch(x -> x == 4 + j);
+
+                    if (found4) {
+
+                        ChangeBackground changebackground = new ChangeBackground();
+                        changebackground.onProgressUpdate(3,data[3]);
+
+                    }
+
+                    DatabaseReference ref5 = database.getReference(room + "/L5");
+
+                    ref5.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            data[4] = dataSnapshot.getValue(int.class);
+
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }});
+
+                    Log.d("val5", String.valueOf(data[4]));
+
+                    boolean found5 = Arrays.stream(ids).anyMatch(x -> x == 5 + j);
+
+                    if (found5) {
+
+                        ChangeBackground changebackground = new ChangeBackground();
+                        changebackground.onProgressUpdate(4,data[4]);
+
+                    }
+
+
+                    DatabaseReference ref6 = database.getReference(room + "/L6");
+
+                    ref6.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            data[5] = dataSnapshot.getValue(int.class);
+
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }});
+
+                    Log.d("val6", String.valueOf(data[5]));
+
+                    boolean found6 = Arrays.stream(ids).anyMatch(x -> x == 6 + j);
+
+                    if (found6) {
+
+                        ChangeBackground changebackground = new ChangeBackground();
+                        changebackground.onProgressUpdate(5,data[5]);
+
                     }
 
 
 
-                    getActivity().runOnUiThread(new Runnable() {
+                    DatabaseReference ref7 = database.getReference(room + "/L7");
+
+                    ref1.addValueEventListener(new ValueEventListener() {
                         @Override
-                        public void run() {
-                            temp.setText("Temp:- " + temperature + "°C");
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            data[6] = dataSnapshot.getValue(int.class);
+
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }});
+
+                    Log.d("val7", String.valueOf(data[6]));
+
+                    boolean found7 = Arrays.stream(ids).anyMatch(x -> x == 7 + j);
+
+                    if (found7) {
+
+                        ChangeBackground changebackground = new ChangeBackground();
+                        changebackground.onProgressUpdate(6,data[6]);
+
+                    }
+
+
+
+
+                    DatabaseReference temper = database.getReference(room+"/temp");
+
+                    temper.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                             temperature = dataSnapshot.getValue(int.class);
+
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }});
+
+                        DatabaseReference door_con = database.getReference(room+"/door");
+
+                    door_con.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange (DataSnapshot dataSnapshot){
+                                 door_cond = dataSnapshot.getValue(int.class);
+
+
+                            }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
                         }
                     });
 
 
-                    if (door_cond == 1) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                door.setText("Door Open");
+                     setTemperature(temperature);
+                     setDoor(door_cond);
 
-                            }
-                        });
-                    } else {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                door.setText("Door Close");
 
-                            }
-                        });
 
-                    }
+
+
+
+
+
+
                     editor2 = preferences2.edit();
                     editor2.clear();
                     editor2.commit();
-                    editor2.putString("datas", mssg);
+                    editor2.putString("datas", String.valueOf(obj));
                     editor2.commit();
 //
 //                    in.close();
 //                    socket2.close();
 
-
+                Thread.sleep(200);
                 } while (!mssg.equals("bye"));
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
     }
 
+
+    public void setTemperature(int temperature){
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                temp.setText("Temp:- " + temperature + "°C");
+            }
+        });
+    }
+
+    public void setDoor(int door_cond){
+
+
+        if (door_cond == 1) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    door.setText("Door Open");
+
+                }
+            });
+        } else {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    door.setText("Door Close");
+
+                }
+            });
+
+        }
+
+    }
 
 
     @TargetApi(Build.VERSION_CODES.N)
@@ -496,22 +727,27 @@ public class room1fragment extends Fragment {
         }
 
         protected void onProgressUpdate(Integer... values) {
+
+
+
+
             if (values[1] == 1) {
                 getActivity().runOnUiThread(new Runnable() { @Override public void run() {
                     textView[values[0] + 1].setBackgroundColor(Color.GREEN);
-                Log.d(String.valueOf(values[0] + 1), String.valueOf(textView[values[0] + 1].getId()));
+//                Log.d(String.valueOf(values[0] + 1), String.valueOf(textView[values[0] + 1].getId()));
             }});}
             else {
               getActivity().runOnUiThread(new Runnable() { @Override public void run() {
                   textView[values[0] + 1].setBackgroundColor(Color.RED);
 
               }});
-                Log.d(String.valueOf(values[0] + 1), String.valueOf(textView[values[0] + 1].getId()));
+//                Log.d(String.valueOf(values[0] + 1), String.valueOf(textView[values[0] + 1].getId()));
 
             }
         }
     }
 }
+
 
 
 
