@@ -67,19 +67,13 @@ public class room2fragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)  {
         ((MainActivity) getActivity()).setActionBarTitle("Room2");
-        Ids = new int[7];
-        data = new int[7];
+        Ids = new int[8];
+        data = new int[8];
         ids = new HashSet<String>();
-        obj = new JSONObject();
 
 
         for (int f = 0; f < 7; f++) {
             data[f] = 3;
-            try {
-                obj.put(String.valueOf(f + 1), 3);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
 
         }
 //        ids.add(String.valueOf(linearlayout.getId())+10);
@@ -179,14 +173,11 @@ public class room2fragment extends Fragment {
                     if (data[s - 1] == 0) {
                         data[s - 1] = 1;
                     } else {
+
                         data[s - 1] = 0;
                     }
 
-                    try {
-                        obj.put(String.valueOf(s), data[s - 1]);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+
                     sentThread = new Thread(new setLight());
                     sentThread.start();
 
@@ -213,7 +204,7 @@ public class room2fragment extends Fragment {
                         }
                     }
 
-                    data[s] =3;
+                    data[s-1] =3;
                     ids = preferences.getStringSet("lights_ids2", ids);
                     editor.commit();
 
@@ -293,12 +284,6 @@ public class room2fragment extends Fragment {
                     data[k - 1] = 0;
                 }
 
-                try {
-                    obj.put(String.valueOf(k), data[k - 1]);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
                 sentThread = new Thread(new setLight());
                 sentThread.start();
 
@@ -358,6 +343,7 @@ public class room2fragment extends Fragment {
     private int findValue() throws JSONException {
 
         int[] id_array = makearray();
+        Arrays.sort(id_array);
         int i = 0;
         for (i = 0; i < id_array.length; i++) {
 //            Log.d("i0", String.valueOf(i));
@@ -382,11 +368,29 @@ public class room2fragment extends Fragment {
 //                os.writeUTF(String.valueOf(obj)+"\n");
 //                os.flush();
 //                os.close();
+            JSONObject sendObj=new JSONObject();
 
-            for(int i=1;i<8;i++) {
-                DatabaseReference myRef = database.getReference(room + "/L" + i);
-                myRef.setValue(data[i-1]);
+            try {
+                sendObj.put("temp",temperature);
+                sendObj.put("door",door_cond);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
+            for(int i=1;i<8;i++) {
+                DatabaseReference myRef = database.getReference(room);
+                try {
+                    sendObj.put("L"+i,data[i-1]);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                myRef.setValue(String.valueOf(sendObj));
+
+
+            }
+
+
 //                socket1.close();
         }
     }
@@ -398,6 +402,7 @@ public class room2fragment extends Fragment {
         public void run() {
             try {
                 do {
+
 
 
 
@@ -415,40 +420,48 @@ public class room2fragment extends Fragment {
 
                     ids = makearray();
 
+                    mssg = preferences2.getString("datas2", mssg);
+
+                    if(mssg.length()!=0) {
+
+                        obj = new JSONObject(mssg);
 
 
-                    DatabaseReference ref1 = database.getReference(room + "/L1");
+                        temperature = (int) obj.get("temp");
+
+                        door_cond = (int) obj.get("door");
+
+                        for (i1 = 1; i1 < 8; i1++) {
+                            data[i1 - 1] = (int) obj.get("L" + i1);
+                            Log.d("L"+i1, String.valueOf(data[i1-1]));
+
+                            boolean found1 = Arrays.stream(ids).anyMatch(x -> x == i1  + j);
+
+                            if (found1) {
+                                Log.d("val"+i1, String.valueOf(data[i1-1]));
+
+
+                                ChangeBackground changebackground = new ChangeBackground();
+                                changebackground.onProgressUpdate(i1 - 1, data[i1 - 1]);
+
+                            }
+
+                        }
+
+
+                        setTemperature(temperature);
+                        setDoor(door_cond);
+
+                    }
+
+
+                    DatabaseReference ref1 = database.getReference(room);
 
                     ref1.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            data[0] = dataSnapshot.getValue(int.class);
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }});
-
-                    Log.d("val1", String.valueOf(data[0]));
-
-                    boolean found1 = Arrays.stream(ids).anyMatch(x -> x == 1 + j);
-
-                    if (found1) {
-
-                        ChangeBackground changebackground = new ChangeBackground();
-                        changebackground.onProgressUpdate(0,data[0]);
-
-                    }
-
-
-                    DatabaseReference ref2 = database.getReference(room + "/L2");
-
-                    ref2.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            data[1] = dataSnapshot.getValue(int.class);
+                            mssg = dataSnapshot.getValue(String.class);
+                            Log.d("mssg", mssg);
 
 
                         }
@@ -457,191 +470,6 @@ public class room2fragment extends Fragment {
                         public void onCancelled(@NonNull DatabaseError databaseError) {
 
                         }});
-
-                    Log.d("val2", String.valueOf(data[1]));
-
-                    boolean found2 = Arrays.stream(ids).anyMatch(x -> x == 2 + j);
-
-                    if (found2) {
-
-                        ChangeBackground changebackground = new ChangeBackground();
-                        changebackground.onProgressUpdate(1,data[1]);
-
-                    }
-
-                    DatabaseReference ref3 = database.getReference(room + "/L3");
-
-                    ref3.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            data[2] = dataSnapshot.getValue(int.class);
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }});
-
-                    Log.d("val3", String.valueOf(data[2]));
-
-                    boolean found3 = Arrays.stream(ids).anyMatch(x -> x == 3 + j);
-
-                    if (found3) {
-
-                        ChangeBackground changebackground = new ChangeBackground();
-                        changebackground.onProgressUpdate(2,data[2]);
-
-                    }
-
-                    DatabaseReference ref4 = database.getReference(room + "/L4");
-
-                    ref4.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            data[3] = dataSnapshot.getValue(int.class);
-
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }});
-
-                    Log.d("val4", String.valueOf(data[3]));
-
-                    boolean found4 = Arrays.stream(ids).anyMatch(x -> x == 4 + j);
-
-                    if (found4) {
-
-                        ChangeBackground changebackground = new ChangeBackground();
-                        changebackground.onProgressUpdate(3,data[3]);
-
-                    }
-
-                    DatabaseReference ref5 = database.getReference(room + "/L5");
-
-                    ref5.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            data[4] = dataSnapshot.getValue(int.class);
-
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }});
-
-                    Log.d("val5", String.valueOf(data[4]));
-
-                    boolean found5 = Arrays.stream(ids).anyMatch(x -> x == 5 + j);
-
-                    if (found5) {
-
-                        ChangeBackground changebackground = new ChangeBackground();
-                        changebackground.onProgressUpdate(4,data[4]);
-
-                    }
-
-
-                    DatabaseReference ref6 = database.getReference(room + "/L6");
-
-                    ref6.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            data[5] = dataSnapshot.getValue(int.class);
-
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }});
-
-                    Log.d("val6", String.valueOf(data[5]));
-
-                    boolean found6 = Arrays.stream(ids).anyMatch(x -> x == 6 + j);
-
-                    if (found6) {
-
-                        ChangeBackground changebackground = new ChangeBackground();
-                        changebackground.onProgressUpdate(5,data[5]);
-
-                    }
-
-
-
-                    DatabaseReference ref7 = database.getReference(room + "/L7");
-
-                    ref1.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            data[6] = dataSnapshot.getValue(int.class);
-
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }});
-
-                    Log.d("val7", String.valueOf(data[6]));
-
-                    boolean found7 = Arrays.stream(ids).anyMatch(x -> x == 7 + j);
-
-                    if (found7) {
-
-                        ChangeBackground changebackground = new ChangeBackground();
-                        changebackground.onProgressUpdate(6,data[6]);
-
-                    }
-
-
-
-
-                    DatabaseReference temper = database.getReference(room+"/temp");
-
-                    temper.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            temperature = dataSnapshot.getValue(int.class);
-
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }});
-
-                    DatabaseReference door_con = database.getReference(room+"/door");
-
-                    door_con.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange (DataSnapshot dataSnapshot){
-                            door_cond = dataSnapshot.getValue(int.class);
-
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
-
-
-                    setTemperature(temperature);
-                    setDoor(door_cond);
-
-
-
-
 
 
 
@@ -650,7 +478,7 @@ public class room2fragment extends Fragment {
                     editor2 = preferences2.edit();
                     editor2.clear();
                     editor2.commit();
-                    editor2.putString("datas", String.valueOf(obj));
+                    editor2.putString("datas2",mssg);
                     editor2.commit();
 //
 //                    in.close();
@@ -719,7 +547,6 @@ public class room2fragment extends Fragment {
         for (int i = 0; i < jsonArray.length(); i++) {
             str[i] = jsonArray.getString(i);
         }
-        Log.d("str", String.valueOf(str));
 
         id_array = Arrays.stream(str).mapToInt(Integer::parseInt).toArray();
 
