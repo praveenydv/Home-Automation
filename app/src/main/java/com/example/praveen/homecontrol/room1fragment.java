@@ -421,8 +421,11 @@ public class room1fragment extends Fragment {
                       ids = makearray();
 
                     mssg = preferences2.getString("datas", mssg);
+                    Log.d(String.valueOf(mssg.length()), mssg);
 
-                    if(mssg.length()!=0) {
+
+
+                    if(mssg.length()>=69) {
 
                         obj = new JSONObject(mssg);
 
@@ -431,14 +434,12 @@ public class room1fragment extends Fragment {
 
                         door_cond = (int) obj.get("door");
 
-                        for (i1 = 1; i1 < 8; i1++) {
+                        for (i1 = 1; i1 < 7; i1++) {
                            data[i1 - 1] = (int) obj.get("L" + i1);
-                            Log.d("L"+i1, String.valueOf(data[i1-1]));
 
                             boolean found1 = Arrays.stream(ids).anyMatch(x -> x == i1  + j);
 
                             if (found1) {
-                                Log.d("val"+i1, String.valueOf(data[i1-1]));
 
 
                                 ChangeBackground changebackground = new ChangeBackground();
@@ -461,7 +462,6 @@ public class room1fragment extends Fragment {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             mssg = dataSnapshot.getValue(String.class);
-                            Log.d("mssg", mssg);
 
 
                         }
