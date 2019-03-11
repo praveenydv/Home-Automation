@@ -8,10 +8,10 @@
 
 
 
-#define FIREBASE_HOST "homecontrol-27e93.firebaseio.com"
-#define FIREBASE_AUTH "1a2DvCZfQEq4SpUnAcn4Upb5BF0Qtc34jq8deoWt"
+#define FIREBASE_HOST "homecontrol-234fe.firebaseio.com"
+#define FIREBASE_AUTH "1a2DvCdsf7fs8fs8f9sdf7sf87sBF0Qtc34jq8deoWt"
 #define WIFI_SSID "1234"
-#define WIFI_PASSWORD "87654321"
+#define WIFI_PASSWORD "12345678"
 #define DHTPIN D0
 #define DHTTYPE DHT11
 
